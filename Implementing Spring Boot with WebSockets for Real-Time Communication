@@ -1,0 +1,42 @@
+WebSocket Configuration:
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/chat").withSockJS();
+    }
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker("/topic");
+        registry.setApplicationDestinationPrefixes("/app");
+    }
+}
+Message Model & Controller:
+// Message Model
+public class ChatMessage {
+    private String sender;
+    private String content;
+}
+// Controller to Handle Messages
+@Controller
+public class ChatController {
+    @MessageMapping("/send")
+    @SendTo("/topic/messages")
+    public ChatMessage sendMessage(ChatMessage message) {
+        return message;
+    }
+}
+Frontend (HTML + JavaScript):
+<script>
+    var socket = new SockJS('/chat');
+    var stompClient = Stomp.over(socket);
+    stompClient.connect({}, function(frame) {
+        stompClient.subscribe('/topic/messages', function(response) {
+            console.log("Received: " + JSON.parse(response.body).content);
+        });
+    });
+    function sendMessage() {
+        stompClient.send("/app/send", {}, JSON.stringify({ sender: "User1", content: "Hello!" }));
+    }
+</script>
