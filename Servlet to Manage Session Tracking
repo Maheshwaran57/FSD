@@ -1,0 +1,31 @@
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+public class SessionServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        HttpSession session = request.getSession();
+        Integer visitCount = (Integer) session.getAttribute("visitCount");
+        if (visitCount == null) {
+            visitCount = 1;
+        } else {
+            visitCount += 1;
+        }
+        session.setAttribute("visitCount", visitCount);
+        out.println("<html><body>");
+        out.println("<h1>Session Tracking Example</h1>");
+        out.println("<p>Number of visits: " + visitCount + "</p>");
+        out.println("</body></html>");
+    }   }
+web.xml Configuration:
+<web-app>
+    <servlet>
+        <servlet-name>SessionServlet</servlet-name>
+        <servlet-class>SessionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SessionServlet</servlet-name>
+        <url-pattern>/session</url-pattern>
+    </servlet-mapping>
+</web-app>
